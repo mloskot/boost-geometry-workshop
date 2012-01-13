@@ -10,5 +10,4 @@ IF NOT EXIST %BUILD% mkdir %BUILD%
 cd %BUILD% & ^
 cmake -G %G% ^
     -DBOOST_ROOT=%BOOST% ^
-    %SRC% & ^
-fix_vs11_sln.bat .\boost_geometry_workshop.sln
+    %SRC%

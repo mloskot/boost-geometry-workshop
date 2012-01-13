@@ -251,7 +251,7 @@ struct distance
 
     // THIS IS IT: if changed into e.g. _MSC_VER_BUG it stops compiling for MSVC
     // It is is _MSC_VER it compiles fine.
-#if 0 //defined(_MSC_VER)
+#if defined(_MSC_VER)
     typedef typename strategy::distance::services::returning_type<strategy_type>::type the_return_type; 
 #else
     typedef typename returning_type<strategy_type>::type the_return_type; 

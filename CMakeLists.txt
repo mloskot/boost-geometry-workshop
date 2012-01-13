@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(boost_geometry_workshop)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 find_package(Boost 1.44 REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

@@ -5,9 +5,9 @@ namespace workshop {
 
 inline std::vector<uint8_t> make_wkb(std::string hex)
 {
-    std::vector<unsigned char> wkb;
-    boost::geometry::hex2wkb(hex, std::back_inserter(wkb));
-    return wkb;
+    std::vector<unsigned char> data;
+    boost::geometry::hex2wkb(hex, std::back_inserter(data));
+    return data;
 }
 
 } // namespace workshop
