@@ -62,24 +62,42 @@ struct read_wkb<polygon_tag, G>
     }
 };
 
-template <typename G>
-struct parser
-{
-    template <typename Iterator>
-    static inline bool apply(Iterator& it, Iterator end, G& geometry,
-        BOOST_SCOPED_ENUM(detail::wkb::byte_order) order)
-
-    {
-        return dispatch::read_wkb
-            <
-            typename tag<G>::type,
-            G
-            >::parse(begin, end, geometry, byte_order);
-    }
-};
+//template <typename G>
+//struct parser
+//{
+//    template <typename Iterator>
+//    static inline bool apply(Iterator& it, Iterator end, G& geometry,
+//        BOOST_SCOPED_ENUM(detail::wkb::byte_order) order)
+//
+//    {
+//        return dispatch::read_wkb
+//            <
+//            typename tag<G>::type,
+//            G
+//            >::parse(begin, end, geometry, byte_order);
+//    }
+//};
 
 } // namespace dispatch
 #endif // DOXYGEN_NO_DISPATCH
+
+
+template <typename Iterator, typename G>
+inline bool read_wkb(Iterator begin, Iterator end, G& geometry, BOOST_SCOPED_ENUM(detail::wkb::byte_order) order)
+{
+    BOOST_STATIC_ASSERT((
+        boost::is_convertible
+        <
+        typename std::iterator_traits<Iterator>::iterator_category,
+        const std::random_access_iterator_tag&
+        >::value));
+
+    return dispatch::read_wkb
+        <
+        typename tag<G>::type,
+        G
+        >::parse(begin, end, geometry, order);
+}
 
 
 template <typename Iterator, typename G>
@@ -96,11 +114,7 @@ inline bool read_wkb(Iterator begin, Iterator end, G& geometry)
     BOOST_SCOPED_ENUM(detail::wkb::byte_order) order;
     if (detail::wkb::byte_order_parser::parse(begin, end, order))
     {
-        return dispatch::read_wkb
-            <
-            typename tag<G>::type,
-            G
-            >::parse(begin, end, geometry, byte_order);
+        return read_wkb(begin, end, geometry, byte_order);
     }
 
     return false;
@@ -131,18 +145,19 @@ inline bool read_wkb(Iterator begin, Iterator end, model::ogc::any_geometry& out
     if (!bgwkb::geometry_type_parser::parse(begin, end, kind, order))
         return false;
 
-#if 0
-    typedef ogc_geometry<CoordinateType> ogc_type;
-    if (bgwkb::geometry_type::point == kind)
+    using model::ogc::wkb_type;
+    if (wkb_type::point == kind)
     {
-        typedef model::d2::point_xy<CoordinateType> output_type;
+        typedef model::ogc::point output_type;
         output_type g;
-        if (dispatch::parser<output_type>::apply(begin, end, g, order))
+        if (read_wkb(begin, end, g, order))
         {
-            //out = g;
+            out = g;
             return true;
         }
     }
+
+#if 0
     else if (bgwkb::geometry_type::linestring == kind)
     {
         typedef model::linestring<point_type> output_type;

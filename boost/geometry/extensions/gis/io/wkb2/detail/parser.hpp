@@ -106,14 +106,14 @@ struct geometry_type_parser
 {
     template <typename Iterator>
     static bool parse(Iterator& it, Iterator end,
-        BOOST_SCOPED_ENUM(model::ogc::wkb_type)& type,
+        BOOST_SCOPED_ENUM(model::ogc::wkb_type)& geom_type,
         BOOST_SCOPED_ENUM(byte_order) order)
     {
         boost::uint32_t value;
         if (value_parser<boost::uint32_t>::parse(it, end, value, order))
         {
             boost::uint32_t id = value & 0xff;
-            type =  model::ogc::make_wkb_type(id);
+            geom_type =  model::ogc::make_wkb_type(id);
             return true;
         }
         return false;
@@ -168,11 +168,12 @@ struct point_parser
     static bool parse(Iterator& it, Iterator end, P& point, BOOST_SCOPED_ENUM(byte_order) order)
     {
         // TODO: mloskot - Add assert on point dimension, 2d only
+        using model::ogc::wkb_type;
+        BOOST_SCOPED_ENUM(model::ogc::wkb_type) geom_type(wkb_type::unknown);
 
-        BOOST_SCOPED_ENUM(model::ogc::wkb_type) wkbtype;
-        if (geometry_type_parser::parse(it, end, wkbtype, order))
+        if (geometry_type_parser::parse(it, end, geom_type, order))
         {
-            if (wkbtype::point == type && it != end)
+            if (wkb_type::point == geom_type && it != end)
             {
                 parsing_assigner<P, 0, dimension<P>::value>::run(it, end, point, order);
             }
@@ -235,13 +236,15 @@ struct linestring_parser
     {
         typedef typename point_type<L>::type point_type;
 
-        BOOST_SCOPED_ENUM(model::ogc::wkb_type) wkbtype;
-        if (!geometry_type_parser::parse(it, end, wkbtype, order))
+        using model::ogc::wkb_type;
+        BOOST_SCOPED_ENUM(model::ogc::wkb_type) geom_type(wkb_type::unknown);
+
+        if (!geometry_type_parser::parse(it, end, geom_type, order))
         {
             return false;
         }
 
-        if (wkbtype::linestring != type)
+        if (wkb_type::linestring != type)
         {
             return false;
         }
@@ -257,6 +260,9 @@ struct polygon_parser
     template <typename Iterator>
     static bool parse(Iterator& it, Iterator end, Polygon& polygon, BOOST_SCOPED_ENUM(byte_order) order)
     {
+        using model::ogc::wkb_type;
+        BOOST_SCOPED_ENUM(model::ogc::wkb_type) geom_type(wkb_type::unknown);
+
         geometry_type::enum_t type;
         if (!geometry_type_parser::parse(it, end, type, order))
         {
